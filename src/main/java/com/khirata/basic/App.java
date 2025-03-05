@@ -1,4 +1,4 @@
-package com.khirata;
+package com.khirata.basic;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
