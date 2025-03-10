@@ -1,4 +1,4 @@
-package com.khirata.validation.args;
+package com.khirata.validation.parameters.basic;
 
 import java.lang.annotation.*;
 import java.lang.reflect.InvocationTargetException;
