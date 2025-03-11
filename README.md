@@ -74,9 +74,10 @@ class Validator implements ConstraintValidator<Required, Object> {
             return false;
         }
 
-        if (value != null && value instanceof String && ((String) value).isBlank()) {
+        if (value instanceof String str && str.isBlank()) {
             return false;
         }
+
         return true;
     }
 }
