@@ -6,6 +6,7 @@ import jakarta.validation.ConstraintValidatorContext;
 import jakarta.validation.Payload;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -42,9 +43,10 @@ class Validator implements ConstraintValidator<Required, Object> {
             return false;
         }
 
-        if (value != null && value instanceof String && ((String) value).isBlank()) {
+        if (value instanceof String str && str.isBlank()) {
             return false;
         }
+
         return true;
     }
 }
@@ -69,7 +71,12 @@ class UserController {
     }
 
     @PostMapping
-    public void createUser(@RequestParam String name, @RequestParam String email) {
-        service.createUser(name, email);
+    public ResponseEntity<String> createUser(@RequestParam String name, @RequestParam String email) {
+        try {
+            service.createUser(name, email);
+            return ResponseEntity.ok("Processed successfully.");
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body(e.getMessage());
+        }
     }
 }
