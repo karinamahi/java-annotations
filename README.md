@@ -4,7 +4,57 @@ This is a study project focused on Java annotations.
 
 ## Basic Implementation
 
-Basic annotation without any complexity.
+Basic annotation without any frameworks. Instead, we will use reflections.
+In this example, I implemented a Java annotation that prints a message before executing the annotated method.
+
+First, I defined `METHOD` as the target:
+```java
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.METHOD)
+@interface MyAnnotation {
+}
+```
+
+And, I created the processor, which identifies the annotated method and prints the message before executing it.
+```java
+class Processor {
+    public void process(Object object) throws InvocationTargetException, IllegalAccessException {
+        var methods = object.getClass().getDeclaredMethods();
+        for (Method method : methods) {
+            if (method.isAnnotationPresent(MyAnnotation.class)) {
+                System.out.println("Executing MyAnnotation before executing the method " + method.getName()); //it will be executed before the annotated method
+            }
+            method.invoke(object);
+        }
+    }
+}
+```
+Here, I'm using the annotation I created on the first method:
+```java
+class MyClass {
+    @MyAnnotation
+    public void annotatedMethod() {
+        System.out.println("Executing annotatedMethod..");
+    }
+
+    public void nonAnnotatedMethod() {
+        System.out.println("Executing nonAnnotatedMethod..");
+    }
+}
+```
+Then, when I execute the code:
+```java
+public static void main( String[] args ) throws InvocationTargetException, IllegalAccessException {
+    var object = new MyClass();
+    new Processor().process(object);
+}
+```
+The output is:
+```text
+Executing MyAnnotation before executing the method annotatedMethod
+Executing annotatedMethod..
+Executing nonAnnotatedMethod..
+```
 
 ## Annotation for Parameters
 
@@ -13,15 +63,15 @@ Basic annotation without any complexity.
 In this example, I created the annotation @Required, and it is used when we want to validate the parameter.
 
 ```java
-    public void createUser(@Required String name, @Required String email) {
-        System.out.println("Executing create user logic..");
-    }
+public void createUser(@Required String name, @Required String email) {
+    System.out.println("Executing create user logic..");
+}
 ```
 
 Behind the scenes, I implemented a validator to check if the value is null or empty.
 It prints error messages when the value is not valid:
 
-```shell
+```text
 Parameter "name" cannot be null.
 Parameter "email" cannot be empty.
 ```
@@ -50,12 +100,12 @@ So, I added the following in pom.xml
 Depending on the situation, we may not want to compile with the `-parameters` option, so let's try another strategy.
 
 First, remove the compile configuration `-parameters` from pom.xml and run the following command:
-```bash
+```shell
 mvn clean compile
 ```
 
 If we run the code, as expected, it will not print the parameter names as it did before:
-```bash
+```text
 Validation failed: Parameter "arg0" cannot be null.
 Validation failed: Parameter "arg1" cannot be empty.
 ```
@@ -91,13 +141,13 @@ for (int i = 0; i < parameters.length; i++) {
 
 Usage:
 ```java
-    public void createUser(@Required(paramName = "username") String name, @Required String email) {
-        System.out.println("Executing create user logic..");
-    }
+public void createUser(@Required(paramName = "username") String name, @Required String email) {
+    System.out.println("Executing create user logic..");
+}
 ```
 
 Output:
-```shell
+```text
 Validation failed: Parameter "username" cannot be null. # custom 
 Validation failed: Parameter "email" cannot be empty.   # default
 ```
@@ -166,7 +216,7 @@ class UserService {
 ```
 After that, I implemented the controller, which calls the service. Then, I tested the implementation using HTTPie.
 
-```bash
+```shell
 # success
 $ http POST ':8080/users?name=Marta&email=marta@email.com'
 HTTP/1.1 200
@@ -189,3 +239,11 @@ Date: Tue, 11 Mar 2025 16:57:23 GMT
 createUser.email: Field cannot be null or empty.
 
 ```
+
+## Common Use Cases for Annotations
+
+- ✅ Validation (@NotBlank, @Required) → Validate input before processing.
+- ✅ Logging & Performance (@LogExecutionTime) → Measure execution time.
+- ✅ Security (@RoleRequired) → Restrict access to admin-only actions.
+- ✅ Auditing (@AuditAction) → Log important user actions.
+- ✅ Feature Flags (@FeatureToggle) → Enable/disable features dynamically.
