@@ -45,6 +45,63 @@ So, I added the following in pom.xml
   </build>
 ```
 
+### Using custom parameter name
+
+Depending on the situation, we may not want to compile with the `-parameters` option, so let's try another strategy.
+
+First, remove the compile configuration `-parameters` from pom.xml and run the following command:
+```bash
+mvn clean compile
+```
+
+If we run the code, as expected, it will not print the parameter names as it did before:
+```bash
+Validation failed: Parameter "arg0" cannot be null.
+Validation failed: Parameter "arg1" cannot be empty.
+```
+
+Then, I added the `paramName` which will allow us to specify a custom parameter name if needed.
+```java
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.PARAMETER)
+@interface Required {
+
+    String paramName() default "";
+}
+```
+
+Now we need to handle the custom or default parameter name:
+```java
+for (int i = 0; i < parameters.length; i++) {
+
+    Object value = args[i];
+    Parameter parameter = parameters[i];
+    
+    if (parameter.isAnnotationPresent(Required.class) && value == null) {
+    String paramName = parameter.getDeclaredAnnotation(Required.class).paramName();
+    throw new IllegalArgumentException("Parameter \"" + ( paramName.isBlank() ? parameter.getName() : paramName ) + "\" cannot be null.");
+    }
+    
+    if (parameter.isAnnotationPresent(Required.class) && value instanceof String str && str.isBlank()) {
+    String paramName = parameter.getDeclaredAnnotation(Required.class).paramName();
+    throw new IllegalArgumentException("Parameter \"" + ( paramName.isBlank() ? parameter.getName() : paramName ) + "\" cannot be empty.");
+    }
+}
+```
+
+Usage:
+```java
+    public void createUser(@Required(paramName = "username") String name, @Required String email) {
+        System.out.println("Executing create user logic..");
+    }
+```
+
+Output:
+```shell
+Validation failed: Parameter "username" cannot be null. # custom 
+Validation failed: Parameter "email" cannot be empty.   # default
+```
+
 ### Using Spring
 
 First, I added the Spring dependencies.

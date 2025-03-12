@@ -42,7 +42,7 @@
         <version>3.8.1</version>
         <configuration>
           <compilerArgs>
-            <arg>-parameters</arg>
+<!--            <arg>-parameters</arg>-->
           </compilerArgs>
         </configuration>
       </plugin>
