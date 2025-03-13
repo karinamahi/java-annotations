@@ -148,8 +148,8 @@ public void createUser(@Required(paramName = "username") String name, @Required 
 
 Output:
 ```text
-Validation failed: Parameter "username" cannot be null. # custom 
-Validation failed: Parameter "email" cannot be empty.   # default
+Validation failed: Parameter "username" cannot be null.  # custom
+Validation failed: Parameter "arg1" cannot be empty.     # default
 ```
 
 ### Using Spring
